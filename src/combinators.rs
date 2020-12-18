@@ -76,13 +76,13 @@ where
 
 pub fn zero_or_more<P, E, S, F, T>(
     parser: F,
-) -> impl Fn(&mut ParseMaster<P, E, S>, P) -> Progress<P, Vec<T>, E>
+) -> impl FnOnce(&mut ParseMaster<P, E, S>, P) -> Progress<P, Vec<T>, E>
 where
     F: Fn(&mut ParseMaster<P, E, S>, P) -> Progress<P, T, E>,
     P: Point,
     E: Recoverable,
 {
-    move |pm, pt| pm.zero_or_more(pt, &parser) // what why ref?
+    move |pm, pt| pm.zero_or_more(pt, parser)
 }
 
 pub fn zero_or_more_append<P, E, S, A, F, T>(
