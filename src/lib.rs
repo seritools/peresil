@@ -56,16 +56,26 @@
 
 /// An analog to `try!`, but for `Progress`
 #[macro_export]
-macro_rules! try_parse(
-    ($e:expr) => ({
+macro_rules! try_parse {
+    ($e:expr) => {{
         match $e {
-            $crate::Progress { status: $crate::Status::Success(val), point } => (point, val),
-            $crate::Progress { status: $crate::Status::Failure(val), point } => {
-                return $crate::Progress { point: point, status: $crate::Status::Failure(val.into()) }
+            $crate::Progress {
+                status: $crate::Status::Success(val),
+                point,
+            } => (point, val),
+
+            $crate::Progress {
+                status: $crate::Status::Failure(val),
+                point,
+            } => {
+                return $crate::Progress {
+                    point,
+                    status: $crate::Status::Failure(val.into()),
             }
         }
-    });
-);
+        }
+    }};
+}
 
 #[cfg(feature = "combinators")]
 pub mod combinators;
