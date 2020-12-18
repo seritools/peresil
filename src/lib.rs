@@ -71,8 +71,8 @@ macro_rules! try_parse {
                 return $crate::Progress {
                     point,
                     status: $crate::Status::Failure(val.into()),
+                }
             }
-        }
         }
     }};
 }
@@ -493,9 +493,9 @@ where
         F: FnOnce(&mut ParseMaster<P, E, S>, P) -> Progress<P, T, E>,
     {
         let recoverable = if let Some(Progress {
-            status: Status::Failure(ref f),
+            status: Status::Failure(f),
             ..
-        }) = self.current
+        }) = &self.current
         {
             f.recoverable()
         } else {
@@ -633,7 +633,7 @@ impl<'a> StringPoint<'a> {
     where
         T: Clone,
     {
-        for &(identifier, ref item) in identifiers {
+        for (identifier, item) in identifiers {
             if self.s.starts_with(identifier) {
                 return self
                     .consume_to(Some(identifier.len()))

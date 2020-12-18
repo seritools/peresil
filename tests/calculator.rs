@@ -41,12 +41,12 @@ impl Expression {
     fn evaluate(&self) -> i32 {
         use Expression::*;
 
-        match *self {
-            Add(ref l, ref r) => l.evaluate() + r.evaluate(),
-            Sub(ref l, ref r) => l.evaluate() - r.evaluate(),
-            Mul(ref l, ref r) => l.evaluate() * r.evaluate(),
-            Div(ref l, ref r) => l.evaluate() / r.evaluate(),
-            Num(v) => v as i32,
+        match self {
+            Add(l, r) => l.evaluate() + r.evaluate(),
+            Sub(l, r) => l.evaluate() - r.evaluate(),
+            Mul(l, r) => l.evaluate() * r.evaluate(),
+            Div(l, r) => l.evaluate() / r.evaluate(),
+            Num(v) => *v as i32,
         }
     }
 }
@@ -92,7 +92,7 @@ where
     loop {
         let mut matched = false;
 
-        for &(ref operator, ref builder) in rules {
+        for (operator, builder) in rules {
             let (pt, op) = start.consume_literal(operator).optional(start);
             if op.is_none() {
                 continue;
