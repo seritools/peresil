@@ -57,7 +57,7 @@
 /// An analog to `try!`, but for `Progress`
 #[macro_export]
 macro_rules! try_parse {
-    ($e:expr) => {{
+    ($e:expr) => {
         match $e {
             $crate::Progress {
                 status: $crate::Status::Success(val),
@@ -74,7 +74,7 @@ macro_rules! try_parse {
                 }
             }
         }
-    }};
+    };
 }
 
 #[cfg(feature = "combinators")]
