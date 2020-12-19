@@ -585,31 +585,28 @@ impl<'a> StringPoint<'a> {
         let matched = &self.s[..len];
         let rest = &self.s[len..];
 
-        Progress {
-            point: StringPoint {
+        Progress::success(
+            StringPoint {
                 s: rest,
                 offset: self.offset + len,
             },
-            status: Status::Success(matched),
+            matched,
+        )
         }
-    }
 
     #[inline]
     fn fail<T>(self) -> Progress<StringPoint<'a>, T, ()> {
-        Progress {
-            point: self,
-            status: Status::Failure(()),
+        Progress::failure(self, ())
         }
-    }
 
     /// Advances the point by the number of bytes. If the value is
     /// `None`, then no value was able to be consumed, and the result
     /// is a failure.
     #[inline]
-    pub fn consume_to(&self, l: Option<usize>) -> Progress<StringPoint<'a>, &'a str, ()> {
+    pub fn consume_to(self, l: Option<usize>) -> Progress<StringPoint<'a>, &'a str, ()> {
         match l {
             None => self.fail(),
-            Some(position) => self.success(position),
+            Some(len) => self.success(len),
         }
     }
 
@@ -660,7 +657,7 @@ impl<'s, T: 's> SlicePoint<'s, T> {
         }
     }
 
-    pub fn advance_by(&self, offset: usize) -> Self {
+    pub fn advance_by(self, offset: usize) -> Self {
         SlicePoint {
             s: &self.s[offset..],
             offset: self.offset + offset,
