@@ -15,5 +15,9 @@ documentation = "https://shepmaster.github.io/peresil/"
 license = "MIT"
 
 [features]
-default = ["combinators"]
+default = ["combinators", "bytes"]
 combinators = []
+bytes = ["paste"]
+
+[dependencies]
+paste = {version = "1", optional = true}

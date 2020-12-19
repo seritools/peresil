@@ -80,6 +80,9 @@ macro_rules! try_parse {
 #[cfg(feature = "combinators")]
 pub mod combinators;
 
+#[cfg(feature = "bytes")]
+pub mod bytes;
+
 /// A location in the parsed data
 pub trait Point: Ord + Copy {
     /// The initial point
@@ -592,12 +595,12 @@ impl<'a> StringPoint<'a> {
             },
             matched,
         )
-        }
+    }
 
     #[inline]
     fn fail<T>(self) -> Progress<StringPoint<'a>, T, ()> {
         Progress::failure(self, ())
-        }
+    }
 
     /// Advances the point by the number of bytes. If the value is
     /// `None`, then no value was able to be consumed, and the result
@@ -650,6 +653,7 @@ pub struct SlicePoint<'a, T: 'a> {
 }
 
 impl<'a, T: 'a> SlicePoint<'a, T> {
+    #[inline]
     pub fn new(slice: &'a [T]) -> Self {
         SlicePoint {
             offset: 0,
@@ -657,10 +661,51 @@ impl<'a, T: 'a> SlicePoint<'a, T> {
         }
     }
 
+    #[inline]
     pub fn advance_by(self, offset: usize) -> Self {
         SlicePoint {
             s: &self.s[offset..],
             offset: self.offset + offset,
+        }
+    }
+
+    #[inline]
+    fn fail<U>(self) -> Progress<SlicePoint<'a, T>, U, ()> {
+        Progress {
+            point: self,
+            status: Status::Failure(()),
+        }
+    }
+
+    #[inline]
+    pub fn success<E>(self, len: usize) -> Progress<SlicePoint<'a, T>, &'a [T], E> {
+        let matched = &self.s[..len];
+        let rest = &self.s[len..];
+
+        Progress {
+            point: SlicePoint {
+                s: rest,
+                offset: self.offset + len,
+            },
+            status: Status::Success(matched),
+        }
+    }
+
+    #[inline]
+    pub fn consume(self, l: usize) -> Progress<SlicePoint<'a, T>, &'a [T], ()> {
+        if l == 0 {
+            self.fail()
+        } else {
+            self.consume0(l)
+        }
+    }
+
+    #[inline]
+    pub fn consume0(self, l: usize) -> Progress<SlicePoint<'a, T>, &'a [T], ()> {
+        if l > self.s.len() {
+            self.fail()
+        } else {
+            self.success(l)
         }
     }
 }
