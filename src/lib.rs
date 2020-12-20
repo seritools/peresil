@@ -80,6 +80,9 @@ macro_rules! try_parse {
 #[cfg(feature = "combinators")]
 pub mod combinators;
 
+#[cfg(feature = "snafu")]
+pub mod snafu;
+
 mod strings;
 pub use self::strings::{Identifier, StringPoint};
 

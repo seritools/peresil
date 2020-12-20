@@ -21,3 +21,4 @@ bytes = ["paste"]
 
 [dependencies]
 paste = { version = "1", optional = true }
+snafu = { version = "0.6", optional = true }
