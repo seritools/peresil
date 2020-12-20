@@ -20,4 +20,4 @@ combinators = []
 bytes = ["paste"]
 
 [dependencies]
-paste = {version = "1", optional = true}
+paste = { version = "1", optional = true }

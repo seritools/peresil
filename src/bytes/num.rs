@@ -1,13 +1,45 @@
 use crate::bytes::BytePoint;
+use crate::Point;
 use crate::Progress;
+
+/// Trait defining simple byte parsers for numeric primitives
+/// in both little-endian and big-endian encodings.
+pub trait ParseNumber: Point {
+    fn u8_le(self) -> Progress<Self, u8, ()>;
+    fn u8_be(self) -> Progress<Self, u8, ()>;
+    fn u16_le(self) -> Progress<Self, u16, ()>;
+    fn u16_be(self) -> Progress<Self, u16, ()>;
+    fn u32_le(self) -> Progress<Self, u32, ()>;
+    fn u32_be(self) -> Progress<Self, u32, ()>;
+    fn u64_le(self) -> Progress<Self, u64, ()>;
+    fn u64_be(self) -> Progress<Self, u64, ()>;
+    fn u128_le(self) -> Progress<Self, u128, ()>;
+    fn u128_be(self) -> Progress<Self, u128, ()>;
+
+    fn i8_le(self) -> Progress<Self, i8, ()>;
+    fn i8_be(self) -> Progress<Self, i8, ()>;
+    fn i16_le(self) -> Progress<Self, i16, ()>;
+    fn i16_be(self) -> Progress<Self, i16, ()>;
+    fn i32_le(self) -> Progress<Self, i32, ()>;
+    fn i32_be(self) -> Progress<Self, i32, ()>;
+    fn i64_le(self) -> Progress<Self, i64, ()>;
+    fn i64_be(self) -> Progress<Self, i64, ()>;
+    fn i128_le(self) -> Progress<Self, i128, ()>;
+    fn i128_be(self) -> Progress<Self, i128, ()>;
+
+    fn f32_le(self) -> Progress<Self, f32, ()>;
+    fn f32_be(self) -> Progress<Self, f32, ()>;
+    fn f64_le(self) -> Progress<Self, f64, ()>;
+    fn f64_be(self) -> Progress<Self, f64, ()>;
+}
 
 macro_rules! impl_number {
     ($num:ident) => {
         paste::paste! {
             #[doc = "Parses a `" $num "` in little-endian encoding."]
             #[inline]
-            pub fn [<$num _le>](p: BytePoint<'_>) -> Progress<BytePoint<'_>, $num, ()> {
-                p
+            fn [<$num _le>](self) -> Progress<Self, $num, ()> {
+                self
                     .consume(::std::mem::size_of::<$num>())
                     .map(|n| {
                         // unwrap cannot fail since n.len() is always at least as big
@@ -19,8 +51,8 @@ macro_rules! impl_number {
 
             #[doc = "Parses a `" $num "` in big-endian encoding."]
             #[inline]
-            pub fn [<$num _be>](p: BytePoint<'_>) -> Progress<BytePoint<'_>, $num, ()> {
-                p
+            fn [<$num _be>](self) -> Progress<Self, $num, ()> {
+                self
                     .consume(::std::mem::size_of::<$num>())
                     .map(|n| {
                         // unwrap cannot fail since n.len() is always at least as big
@@ -38,11 +70,13 @@ macro_rules! impl_number {
     };
 }
 
-impl_number!(
-    u8 u16 u32 u64 u128
-    i8 i16 i32 i64 i128
-    f32 f64
-);
+impl ParseNumber for BytePoint<'_> {
+    impl_number!(
+        u8 u16 u32 u64 u128
+        i8 i16 i32 i64 i128
+        f32 f64
+    );
+}
 
 #[cfg(test)]
 mod test {
@@ -62,10 +96,10 @@ mod test {
             status: Status::Failure(()),
         };
 
-        assert_eq!(u64_le(p), expected_u64);
-        assert_eq!(u64_be(p), expected_u64);
-        assert_eq!(i8_le(p), expected_i8);
-        assert_eq!(i8_be(p), expected_i8);
+        assert_eq!(p.u64_le(), expected_u64);
+        assert_eq!(p.u64_be(), expected_u64);
+        assert_eq!(p.i8_le(), expected_i8);
+        assert_eq!(p.i8_be(), expected_i8);
     }
 
     #[test]
@@ -76,14 +110,14 @@ mod test {
         };
 
         assert_eq!(
-            u64_le(p),
+            p.u64_le(),
             Progress {
                 point: BytePoint { offset: 8, s: &[] },
                 status: Status::Success(0x0D_F0_0D_D0_04_03_02_01_u64),
             }
         );
         assert_eq!(
-            i16_le(p),
+            p.i16_le(),
             Progress {
                 point: BytePoint {
                     offset: 2,
@@ -94,14 +128,14 @@ mod test {
         );
 
         assert_eq!(
-            u64_be(p),
+            p.u64_be(),
             Progress {
                 point: BytePoint { offset: 8, s: &[] },
                 status: Status::Success(0x01_02_03_04_D0_0D_F0_0D_u64),
             }
         );
         assert_eq!(
-            i16_be(p),
+            p.i16_be(),
             Progress {
                 point: BytePoint {
                     offset: 2,

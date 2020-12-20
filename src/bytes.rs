@@ -1,5 +1,6 @@
 use crate::SlicePoint;
 
-pub mod num;
+mod num;
+pub use self::num::ParseNumber;
 
 pub type BytePoint<'a> = SlicePoint<'a, u8>;
